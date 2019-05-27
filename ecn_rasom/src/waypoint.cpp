@@ -1,134 +1,134 @@
-#include <ros/ros.h>
-#include <ros/package.h>
-#include <string>
-#include <math.h>
-#include <sstream>
+    #include <ros/ros.h>
+    #include <ros/package.h>
+    #include <string>
+    #include <math.h>
+    #include <sstream>
 
-#include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/Point.h>
-#include <nav_msgs/Odometry.h>
-#include <yaml-cpp/yaml.h>
+    #include <geometry_msgs/PoseStamped.h>
+    #include <geometry_msgs/Point.h>
+    #include <nav_msgs/Odometry.h>
+    #include <yaml-cpp/yaml.h>
 
-using namespace std;
+    using namespace std;
 
-// global variables for subscriber
-bool odom_ok;
-geometry_msgs::Pose pose;
+    // global variables for subscriber
+    bool odom_ok;
+    geometry_msgs::Pose pose;
 
-double position_error = 0.0;
-double angle_error = 0.0;
+    double position_error = 0.0;
+    double angle_error = 0.0;
 
-void poseCallback(const nav_msgs::OdometryConstPtr & msg)
-{
-    pose = msg->pose.pose;
-    odom_ok = true;
-}
-
-// global vars for WP / setpoint
-YAML::Node wp;
-geometry_msgs::PoseStamped setpoint;
-
-// get a particular coordinate of a given WP
-double coord(int idx, std::string var)
-{
-    return wp[idx][var].as<double>();
-}
-
-void writeWP(int idx)
-{
-    setpoint.pose.position.x = coord(idx, "x");
-    setpoint.pose.position.y = coord(idx, "y");
-    setpoint.pose.position.z = coord(idx, "z");
-    setpoint.pose.orientation.x = 0;
-    setpoint.pose.orientation.y = 0;
-    setpoint.pose.orientation.z = sin(coord(idx, "theta")/2);
-    setpoint.pose.orientation.w = cos(coord(idx, "theta")/2);
-
-    setpoint.header.stamp = ros::Time::now();
-}
-
-int main (int argc, char** argv)
-{
-    ros::init(argc, argv, "waypoint");
-    ros::NodeHandle nh;
-
-    // subscriber
-    odom_ok = false;
-    ros::Subscriber state_sub = nh.subscribe<nav_msgs::Odometry> ("/auv/state", 1, poseCallback);
-
-    // publisher
-    ros::Publisher setpoint_pub = nh.advertise<geometry_msgs::PoseStamped>("/auv/body_position_setpoint", 1);
-    setpoint.header.frame_id = "world";
-
-    // load waypoints
-    std::string wp_path = ros::package::getPath("ecn_rasom") + "/config/waypoints.yaml";
-    YAML::Node node = YAML::LoadFile(wp_path);
-    // get thresholds
-    const double thr = node["threshold"].as<double>();
-    std::cout << "WP Threshold: " << thr << std::endl;
-    const double thr_angle = node["threshold_angle"].as<double>();
-    std::cout << "WP Angle Threshold: " << thr_angle << std::endl;
-
-    // get waypoints
-    wp = node["wp"];
-    std::cout << "Found " << wp.size() << " waypoints" << std::endl;
-    int idx;
-    for(idx = 0; idx < wp.size(); ++idx)
+    void poseCallback(const nav_msgs::OdometryConstPtr & msg)
     {
-        std::cout << "   wp #" << idx << ": ";
-        std::cout << "x = " << coord(idx, "x");
-        std::cout << ", y = " << coord(idx, "y");
-        std::cout << ", z = " << coord(idx, "z");
-        std::cout << ", theta = " << coord(idx, "theta");
-        std::cout << std::endl;
+        pose = msg->pose.pose;
+        odom_ok = true;
     }
 
-    // write first WP
-    writeWP(0);
+    // global vars for WP / setpoint
+    YAML::Node wp;
+    geometry_msgs::PoseStamped setpoint;
 
-    ros::Rate rate(10);
-
-    // waypoint index
-    idx = 0;
-
-    while (ros::ok())
+    // get a particular coordinate of a given WP
+    double coord(int idx, std::string var)
     {
+        return wp[idx][var].as<double>();
+    }
+
+    void writeWP(int idx)
+    {
+        setpoint.pose.position.x = coord(idx, "x");
+        setpoint.pose.position.y = coord(idx, "y");
+        setpoint.pose.position.z = coord(idx, "z");
+        setpoint.pose.orientation.x = 0;
+        setpoint.pose.orientation.y = 0;
+        setpoint.pose.orientation.z = sin(coord(idx, "theta")/2);
+        setpoint.pose.orientation.w = cos(coord(idx, "theta")/2);
+
+        setpoint.header.stamp = ros::Time::now();
+    }
+
+    int main (int argc, char** argv)
+    {
+        ros::init(argc, argv, "waypoint");
+        ros::NodeHandle nh;
+
+        // subscriber
+        odom_ok = false;
+        ros::Subscriber state_sub = nh.subscribe<nav_msgs::Odometry> ("/auv/state", 1, poseCallback);
+
+        // publisher
+        ros::Publisher setpoint_pub = nh.advertise<geometry_msgs::PoseStamped>("/auv/body_position_setpoint", 1);
+        setpoint.header.frame_id = "world";
+
+        // load waypoints
+        std::string wp_path = ros::package::getPath("ecn_rasom") + "/config/waypoints.yaml";
+        YAML::Node node = YAML::LoadFile(wp_path);
+        // get thresholds
+        const double thr = node["threshold"].as<double>();
+        std::cout << "WP Threshold: " << thr << std::endl;
+        const double thr_angle = node["threshold_angle"].as<double>();
+        std::cout << "WP Angle Threshold: " << thr_angle << std::endl;
+
+        // get waypoints
+        wp = node["wp"];
+        std::cout << "Found " << wp.size() << " waypoints" << std::endl;
+        int idx;
+        for(idx = 0; idx < wp.size(); ++idx)
+        {
+            std::cout << "   WP #" << idx << ": ";
+            std::cout << "x = " << coord(idx, "x");
+            std::cout << ", y = " << coord(idx, "y");
+            std::cout << ", z = " << coord(idx, "z");
+            std::cout << ", theta = " << coord(idx, "theta");
+            std::cout << std::endl;
+        }
+
+        // write first WP
+        writeWP(0);
+
+        ros::Rate rate(10);
+
+        // waypoint index
+        idx = 0;
+
+        while (ros::ok())
+        {
 
         if(odom_ok)
-        {
-            // check Cartesian distance to current wp
-            // update setpoint if needed
-            position_error = sqrt(pow(setpoint.pose.position.x-pose.position.x,2.0)
-                                  +pow(setpoint.pose.position.y-pose.position.y,2.0)
-                                  +pow(setpoint.pose.position.z-pose.position.z,2.0));
-
-
-            angle_error = coord(idx, "theta") - atan2(pose.orientation.z,pose.orientation.w)*2;
-
-            std::cout<<"idx: "<< idx;
-            std::cout<<"  Position error is: "<< position_error;
-            std::cout<<"  Position Threshold is: "<< thr << std::endl;
-            std::cout<<"  Angle error is: "<< angle_error;
-            std::cout<<"  Angle Threshold is: "<< thr_angle << std::endl;
-
-            if(abs(position_error)<=thr && abs(angle_error)<=thr_angle)
             {
-                idx++;
-
-                if(idx >= wp.size()) idx = 0;
-
-                writeWP(idx);
-            }
-
+                // check Cartesian distance to current wp
+                // update setpoint if needed
+                position_error = sqrt(pow(setpoint.pose.position.x-pose.position.x,2.0)
+                                    +pow(setpoint.pose.position.y-pose.position.y,2.0)
+                                    +pow(setpoint.pose.position.z-pose.position.z,2.0));
 
 
+                angle_error = coord(idx, "theta") - atan2(pose.orientation.z,pose.orientation.w)*2;
+
+                std::cout<<"idx: "<< idx;
+                std::cout<<"  Position error is: "<< position_error;
+                std::cout<<"  Position Threshold is: "<< thr << std::endl;
+                std::cout<<"  Angle error is: "<< angle_error;
+                std::cout<<"  Angle Threshold is: "<< thr_angle << std::endl;
+
+                if(position_error<=thr && abs(angle_error)<=thr_angle)
+                {
+                    idx++;
+
+                    if(idx >= wp.size()) idx = 0;
+
+                    writeWP(idx);
+                }
 
 
-            // publish setpoint
-            setpoint_pub.publish(setpoint);
-        }
-        ros::spinOnce();
-        rate.sleep();
     }
 
-}
+
+                // publish setpoint
+                setpoint_pub.publish(setpoint);
+            
+            ros::spinOnce();
+            rate.sleep();
+        }
+
+    }
