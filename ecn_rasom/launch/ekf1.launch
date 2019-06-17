@@ -9,6 +9,8 @@
     <group ns="auv">
 	
 	<node pkg="ecn_rasom" type="waypoint" name="wp" />
+	<node pkg="ecn_rasom" type="beacons" name="bc" />
+	<node pkg="ecn_rasom" type="auv_beacons" name="ab" />
         
         <!-- run your waypoint follower here -->
 
@@ -25,7 +27,7 @@
            e.g., odom0, odom1, twist0, twist1, imu0, imu1, imu2, etc. The value should be the topic name. These
            parameters obviously have no default values, and must be specified. -->
 			<param name="pose0" value="/auv/depth"/>    <!-- ODOM depth= Z-position  data topic -->
-			<param name="pose1" value="/auv/usbl"/>		<!-- ODOM X, Y position and Z_angle_yaw data topic -->
+			<param name="pose1" value="/usbl_range"/>		<!-- ODOM X, Y position and Z_angle_yaw data topic -->
             <param name="imu0" value="/auv/imu_data"/>    <!-- IMU data topic -->
       
       
@@ -43,7 +45,7 @@
                                             false, false, false]</rosparam>
             
             <rosparam param="pose1_config">[true, true, false,
-                                            false, false, true,
+                                            false, false, false,
                                             false, false, false,
                                             false, false, false,
                                             false, false, false]</rosparam>
