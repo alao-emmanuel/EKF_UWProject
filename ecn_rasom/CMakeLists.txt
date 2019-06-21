@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   sensor_msgs
   geometry_msgs
+  visp_bridge
   message_generation
 )
 
@@ -40,10 +41,10 @@ include_directories(
 ## Declare a C++ executable
 add_executable(waypoint src/waypoint.cpp)
 add_executable(beacons src/beacons.cpp)
-add_executable(auv_beacons src/auv_beacons.cpp)
+add_executable(beacons_trilateration src/beacons_trilateration.cpp)
 
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(waypoint ${catkin_LIBRARIES} yaml-cpp)
 target_link_libraries(beacons ${catkin_LIBRARIES} yaml-cpp)
-target_link_libraries(auv_beacons ${catkin_LIBRARIES} yaml-cpp)
+target_link_libraries(beacons_trilateration ${catkin_LIBRARIES} yaml-cpp)
