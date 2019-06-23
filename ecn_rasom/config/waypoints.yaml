@@ -1,8 +1,13 @@
 threshold: 0.5
 threshold_angle: 0.4
 wp:
-    - {x: 0, y: 5, z: -4, theta: -1.05}
-    - {x: 1, y: 4, z: -4, theta: -0.6}
-    - {x: 2, y: 3, z: -5, theta: 0}
-    - {x: 3, y: 4, z: -4, theta: 0.6}
-    - {x: 4, y: 5, z: -4, theta: -1}
+    - {x: 0, y: 10, z: -1, theta: -1.05}
+    - {x: 1, y: 8, z: -2, theta: -0.6}
+    - {x: 2, y: 6, z: -3, theta: 0}
+    - {x: 3, y: 3, z: -4, theta: 0.6}
+    - {x: 4, y: 1, z: -5, theta: -1}
+    - {x: 4, y: -1, z: -5, theta: -1.05}
+    - {x: 3, y: -3, z: -4, theta: -0.6}
+    - {x: 2, y: -6, z: -3, theta: 0}
+    - {x: 1, y: -8, z: -2, theta: 0.6}
+    - {x: 0, y: 10, z: -1, theta: -1}

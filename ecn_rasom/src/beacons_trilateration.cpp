@@ -87,9 +87,9 @@ int main(int argc, char** argv)
             sqrt(pow(auvPositionVec[0] - pose.position.x, 2.0) + pow(auvPositionVec[1] - pose.position.y, 2.0) +
                  pow(auvPositionVec[2] - pose.position.z, 2.0));
 
-        poseStamped.pose.covariance = { 0.1, 0,   0,   0,     0,     0,        // covariance on x
-                                        0,   0.1, 0,   0,     0,     0,        // covariance on y
-                                        0,   0,   0.1, 0,     0,     0,        // covariance on z
+        poseStamped.pose.covariance = { 0.3, 0,   0,   0,     0,     0,        // covariance on x
+                                        0,   0.3, 0,   0,     0,     0,        // covariance on y
+                                        0,   0,   0.3, 0,     0,     0,        // covariance on z
                                         0,   0,   0,   99999, 0,     0,        // large covariance on rot x
                                         0,   0,   0,   0,     99999, 0,        // large covariance on rot y
                                         0,   0,   0,   0,     0,     99999 };  // large covariance on rot z

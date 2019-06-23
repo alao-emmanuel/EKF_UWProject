@@ -9,9 +9,14 @@
     <group ns="auv">
 	
 	<node pkg="ecn_rasom" type="waypoint" name="waypoints_node" />
-	<node pkg="ecn_rasom" type="beacons" name="beacon_detector" />
-	<node pkg="ecn_rasom" type="beacons_trilateration" name="trilateration" />
+
+	<node pkg="ecn_rasom" type="beacons" name="beacon_detector">
+		<param name="noise_mean" value="0.01" />
+		<param name="noise_stddev" value="0.03" />
+	</node>
         
+	<node pkg="ecn_rasom" type="beacons_trilateration" name="trilateration" />
+		
         <!-- run your waypoint follower here -->
 
         

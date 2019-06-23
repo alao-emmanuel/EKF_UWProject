@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   visp_bridge
+  visualization_msgs
   message_generation
 )
 
