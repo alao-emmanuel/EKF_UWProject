@@ -173,7 +173,7 @@ int main(int argc, char** argv)
                             pow(setpoint.pose.position.y - pose.position.y, 2.0) +
                             pow(setpoint.pose.position.z - pose.position.z, 2.0));
 
-        // beacon_range += dist(generator);
+        beacon_range += dist(generator);
 
         std::cout << "Beacon: " << idx;
         std::cout << " Range is: " << beacon_range << std::endl << std::endl;

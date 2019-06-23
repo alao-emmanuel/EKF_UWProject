@@ -15,6 +15,7 @@ using namespace std;
 
 // global variables for subscriber
 bool odom_ok;
+
 vpMatrix BeaconsMat;
 vpColVector BeaconsBvec;
 vpColVector auvPositionVec(3);
@@ -22,6 +23,7 @@ geometry_msgs::PoseWithCovarianceStamped poseStamped;
 ecn_rasom::beacons_ping beacons_msg;
 
 geometry_msgs::Pose pose;
+geometry_msgs::Pose statepose;
 void poseCallback(const nav_msgs::OdometryConstPtr& msg)
 {
   pose = msg->pose.pose;
@@ -34,6 +36,11 @@ void beaconCallback(ecn_rasom::beacons_ping msg)
   odom_ok = true;
 }
 
+void stateCallback(const nav_msgs::OdometryConstPtr& msg2)
+{
+  statepose = msg2->pose.pose;
+}
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "beacons_trilateration");
@@ -42,11 +49,16 @@ int main(int argc, char** argv)
   // subscriber
   odom_ok = false;
   ros::Subscriber state_sub = nh.subscribe<nav_msgs::Odometry>("/auv/ground_truth", 1, poseCallback);
+
+  ros::Subscriber state_sub2 = nh.subscribe<nav_msgs::Odometry>("/auv/state", 1, stateCallback);
+
   ros::Subscriber beacon_sub = nh.subscribe<ecn_rasom::beacons_ping>("/beacons_detected", 1, beaconCallback);
 
   // publisher
   ros::Publisher pose_pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/usbl_range", 1);
   poseStamped.header.frame_id = "world";
+
+  ros::Publisher error_pub = nh.advertise<ecn_rasom::beacons_ping>("/pose_error", 1);
 
   ros::Rate rate(20);
 
@@ -61,6 +73,8 @@ int main(int argc, char** argv)
       int rows = beacons_msg.id.size();
       BeaconsMat.resize(rows, 3);
       BeaconsBvec.resize(rows);
+
+      ecn_rasom::beacons_ping error_msg;
 
       if (rows >= 4)
       {
@@ -83,9 +97,26 @@ int main(int argc, char** argv)
         poseStamped.pose.pose.position.y = auvPositionVec[1];
         poseStamped.pose.pose.position.z = auvPositionVec[2];
 
-        double beacon_pose_error =
-            sqrt(pow(auvPositionVec[0] - pose.position.x, 2.0) + pow(auvPositionVec[1] - pose.position.y, 2.0) +
-                 pow(auvPositionVec[2] - pose.position.z, 2.0));
+        double beacon_pose_error = sqrt(pow(auvPositionVec[0] - statepose.position.x, 2.0) +
+                                        pow(auvPositionVec[1] - statepose.position.y, 2.0) +
+                                        pow(auvPositionVec[2] - statepose.position.z, 2.0));
+
+        double x_error = statepose.position.x - pose.position.x;
+
+        double y_error = statepose.position.y - pose.position.y;
+
+        double z_error = statepose.position.z - pose.position.z;
+
+        double angle_error = atan2(statepose.orientation.z, statepose.orientation.w) * 2 -
+                             atan2(pose.orientation.z, pose.orientation.w) * 2;
+
+        error_msg.id.push_back(idx);
+        error_msg.x.push_back(x_error);
+        error_msg.y.push_back(y_error);
+        error_msg.z.push_back(z_error);
+        error_msg.r.push_back(angle_error);
+
+        error_pub.publish(error_msg);
 
         poseStamped.pose.covariance = { 0.3, 0,   0,   0,     0,     0,        // covariance on x
                                         0,   0.3, 0,   0,     0,     0,        // covariance on y

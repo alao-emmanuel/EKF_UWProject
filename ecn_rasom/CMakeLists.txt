@@ -43,9 +43,11 @@ include_directories(
 add_executable(waypoint src/waypoint.cpp)
 add_executable(beacons src/beacons.cpp)
 add_executable(beacons_trilateration src/beacons_trilateration.cpp)
-
+add_executable(error_publisher src/error_publisher.cpp)
 
 ## Specify libraries to link a library or executable target against
+
 target_link_libraries(waypoint ${catkin_LIBRARIES} yaml-cpp)
 target_link_libraries(beacons ${catkin_LIBRARIES} yaml-cpp)
 target_link_libraries(beacons_trilateration ${catkin_LIBRARIES} yaml-cpp)
+target_link_libraries(error_publisher ${catkin_LIBRARIES} yaml-cpp)
